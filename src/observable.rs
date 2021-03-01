@@ -1,44 +1,26 @@
-mod trivial;
-pub use trivial::*;
+use std::ops::{Add, Mul};
+use std::time::{Duration, Instant};
 
-mod from_iter;
-pub use from_iter::{from_iter, repeat};
-
-mod of;
-pub use of::{of, of_fn, of_option, of_result, of_sequence};
-
-pub(crate) mod from_future;
-pub use from_future::{from_future, from_future_result};
-
-pub(crate) mod interval;
-pub use interval::{interval, interval_at};
-
-pub(crate) mod connectable_observable;
+pub use base::*;
 pub use connectable_observable::{
   ConnectableObservable, LocalConnectableObservable,
   SharedConnectableObservable,
 };
-
-mod base;
-pub use base::*;
-
-pub mod from_fn;
 pub use from_fn::*;
-
-mod observable_all;
+pub use from_future::{from_future, from_future_result};
+pub use from_iter::{from_iter, repeat};
+pub use interval::{interval, interval_at};
 pub use observable_all::*;
-mod observable_err;
-pub use observable_err::*;
-mod observable_next;
-pub use observable_next::*;
-mod observable_comp;
-use crate::prelude::*;
 pub use observable_comp::*;
-
-use crate::ops::default_if_empty::DefaultIfEmptyOp;
+pub use observable_err::*;
+pub use observable_next::*;
+pub use of::{of, of_fn, of_option, of_result, of_sequence};
 use ops::{
+  Accum,
+  AverageOp,
   box_it::{BoxOp, IntoBox},
   contains::ContainsOp,
+  CountOp,
   debounce::DebounceOp,
   delay::DelayOp,
   distinct::DistinctOp,
@@ -49,7 +31,9 @@ use ops::{
   map::MapOp,
   map_to::MapToOp,
   merge::MergeOp,
+  MinMaxOp,
   observe_on::ObserveOnOp,
+  ReduceOp,
   ref_count::{RefCount, RefCountCreator},
   sample::SampleOp,
   scan::ScanOp,
@@ -57,16 +41,26 @@ use ops::{
   skip_last::SkipLastOp,
   skip_while::SkipWhileOp,
   subscribe_on::SubscribeOnOP,
-  take::TakeOp,
-  take_last::TakeLastOp,
-  take_until::TakeUntilOp,
-  take_while::TakeWhileOp,
-  throttle_time::{ThrottleEdge, ThrottleTimeOp},
-  zip::ZipOp,
-  Accum, AverageOp, CountOp, MinMaxOp, ReduceOp, SumOp,
+  SumOp,
+  take::TakeOp, take_last::TakeLastOp, take_until::TakeUntilOp, take_while::TakeWhileOp, throttle_time::{ThrottleEdge, ThrottleTimeOp}, zip::ZipOp,
 };
-use std::ops::{Add, Mul};
-use std::time::{Duration, Instant};
+pub use trivial::*;
+
+use crate::ops::default_if_empty::DefaultIfEmptyOp;
+use crate::prelude::*;
+
+mod trivial;
+mod from_iter;
+mod of;
+pub(crate) mod from_future;
+pub mod interval;
+pub(crate) mod connectable_observable;
+mod base;
+pub mod from_fn;
+mod observable_all;
+mod observable_err;
+mod observable_next;
+mod observable_comp;
 
 pub trait Observable: Sized {
   type Item;
@@ -1127,8 +1121,10 @@ pub(crate) macro observable_proxy_impl(
 #[cfg(test)]
 mod tests {
   extern crate test;
-  use super::*;
+
   use test::Bencher;
+
+  use super::*;
 
   #[test]
   fn smoke_element_at() {
